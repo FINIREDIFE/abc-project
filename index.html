@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来自我连续性与拖延症深度评估</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at top right, #0f172a, #020617);
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+        }
+
+        .progress-bar {
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .option-btn:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateX(8px);
+        }
+
+        .advice-card {
+            border-top: 4px solid #3b82f6;
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .score-glow {
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+        }
+    </style>
+</head>
+<body class="p-4 md:p-12">
+
+<div id="app" class="max-w-4xl mx-auto">
+    <!-- Start Screen -->
+    <div id="start-screen" class="text-center py-16 animate-slide-up">
+        <div class="mb-10">
+            <div class="inline-block p-5 rounded-3xl bg-blue-600/10 mb-6 border border-blue-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
+                未来自我连续性测评
+            </h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                为什么我们明知该努力却依然选择刷手机？<br>
+                心理学家 Hal Hershfield 认为，这取决于你如何看待“未来的自己”。
+            </p>
+        </div>
+        <div class="glass-card p-10 text-left mb-10 max-w-2xl mx-auto">
+            <h2 class="text-xl font-bold mb-5 text-blue-300 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0"></path></svg>
+                测评价值
+            </h2>
+            <ul class="space-y-4 text-slate-300">
+                <li class="flex items-start"><span class="text-blue-500 mr-2">✦</span> 揭示你大脑中“当下自我”与“未来自我”的鸿沟。</li>
+                <li class="flex items-start"><span class="text-blue-500 mr-2">✦</span> 识别导致你拖延的深层认知偏差。</li>
+                <li class="flex items-start"><span class="text-blue-500 mr-2">✦</span> 获取基于行为经济学的“强制约束”行动方案。</li>
+            </ul>
+        </div>
+        <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-5 px-12 rounded-2xl transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+            进入深度评估
+        </button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="hidden animate-slide-up">
+        <div class="mb-12">
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-blue-400">进行中 <span id="current-step">1</span> / 15</span>
+                <span class="text-xs text-slate-500 font-mono" id="progress-percent">已完成 6.6%</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-600 to-indigo-400 h-full progress-bar" style="width: 6.66%"></div>
+            </div>
+        </div>
+
+        <div class="glass-card p-10 md:p-14 mb-8">
+            <h3 id="question-text" class="text-2xl md:text-3xl font-bold mb-10 leading-snug text-white">
+                <!-- Question will be injected here -->
+            </h3>
+            <div id="options-container" class="grid grid-cols-1 gap-4">
+                <!-- Options injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="hidden animate-slide-up">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-white mb-3">深度分析报告</h2>
+            <div class="h-1 w-24 bg-blue-600 mx-auto rounded-full"></div>
+        </div>
+
+        <!-- Score & Main Category -->
+        <div class="glass-card p-10 mb-10 overflow-hidden relative">
+            <div class="flex flex-col md:flex-row items-center gap-12 relative z-10">
+                <div class="relative w-56 h-56 flex items-center justify-center score-glow">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="112" cy="112" r="100" stroke="rgba(255,255,255,0.05)" stroke-width="14" fill="transparent"></circle>
+                        <circle id="score-circle" cx="112" cy="112" r="100" stroke="url(#gradient)" stroke-width="14" fill="transparent" stroke-dasharray="628" stroke-dashoffset="628" stroke-linecap="round" class="transition-all duration-1000"></circle>
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#3b82f6" />
+                                <stop offset="100%" stop-color="#818cf8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="absolute text-center">
+                        <span id="score-value" class="text-6xl font-black text-white leading-none">0</span>
+                        <span class="text-slate-400 block text-xs mt-2 font-bold tracking-widest uppercase">FSC 指数</span>
+                    </div>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <div id="result-badge" class="inline-block px-4 py-1 rounded-full bg-blue-500/20 text-blue-400 text-sm font-bold mb-4 border border-blue-500/30 tracking-wide uppercase">正在生成</div>
+                    <h3 id="result-title" class="text-3xl md:text-4xl font-extrabold text-white mb-4">分析中...</h3>
+                    <p id="result-desc" class="text-slate-300 text-lg leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div class="space-y-10">
+            <!-- Psychological Insight -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h4 class="text-2xl font-bold text-white tracking-tight">核心心理洞察</h4>
+                </div>
+                <div id="deep-analysis" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Dynamic analysis cards -->
+                </div>
+            </section>
+
+            <!-- Action Roadmap -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-green-600/20 flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    <h4 class="text-2xl font-bold text-white tracking-tight">针对性干预方案</h4>
+                </div>
+                <div id="action-plans" class="space-y-6">
+                    <!-- Action steps -->
+                </div>
+            </section>
+
+            <!-- Commitment Tools -->
+            <section class="glass-card p-10 bg-indigo-900/10 border-indigo-500/20">
+                <div class="flex items-center mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600/20 flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-bold text-white">外部约束：承诺工具 (Commitment Devices)</h4>
+                        <p class="text-slate-400 text-sm mt-1">当意志力失效时，依靠系统锁定你的选择</p>
+                    </div>
+                </div>
+                <div id="tool-recommendations" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tool cards -->
+                </div>
+            </section>
+        </div>
+
+        <div class="mt-16 text-center">
+            <button onclick="location.reload()" class="px-8 py-3 text-slate-500 hover:text-white border border-slate-700 hover:border-white rounded-full transition-all text-sm font-bold uppercase tracking-widest">
+                重新进行测评
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "当你闭上眼想象十年后的自己，那个形象看起来如何？", options: ["完全陌生，甚至无法想象", "模糊的剪影，没有细节", "普通人的轮廓", "比较生动，有一定细节", "极其真实，仿佛就在眼前"] },
+        { q: "你认为目前的消费行为是在：", options: ["纯粹犒劳现在的自己", "主要满足当下，以后再说", "平衡当下与未来", "有意识地为未来储蓄", "现在的克制是为了未来的自由"] },
+        { q: "面对一个月的截止日期，你的典型心态是：", options: ["那是下个月的我的问题", "等最后一周再说", "偶尔会焦虑但不动手", "有计划地分阶段执行", "立即开始，减轻未来压力"] },
+        { q: "如果你能对十年后的自己说话，你的第一反应是：", options: ["无话可说，没共鸣", "祝ta好运吧", "希望能像个老朋友般聊天", "充满了关切和叮嘱", "ta就是我，我正为ta努力"] },
+        { q: "你对“时间流逝”的感知更接近于：", options: ["时间是静止的，未来还早", "偶尔感叹时间快", "稳定的线性流动", "未来正在急速向我逼近", "每一秒都在塑造未来的我"] },
+        { q: "当你在刷短视频而推迟工作时，你大脑的感受是：", options: ["只有当下的快乐", "知道该做但不想停", "有一种模糊的罪恶感", "能清晰感觉到未来的自己在叹气", "强烈的羞愧感，仿佛在背叛老友"] },
+        { q: "你是否认同：你的本质属性在十年后依然保持稳定？", options: ["不认同，我会变成另一个人", "可能会变很多", "一半一半", "基本特征会保留", "我就是我，本质永恒不变"] },
+        { q: "当你听到“养老金”或“长期投资”时，你的感觉是：", options: ["无感，那是老人的事", "有一点压力", "觉得需要了解", "已经在积极规划", "这是目前最重要的任务之一"] },
+        { q: "为了五年后的巨大成功，你现在愿意保持孤独/高强度工作吗？", options: ["绝对不愿意", "可能坚持不了一周", "可以忍受一段时间", "愿意付出较大的代价", "毫无疑问，这是必须的交换"] },
+        { q: "你觉得自己与未来的自己之间的关系更像：", options: ["完全不认识的路人", "有过几面之缘的邻居", "普通的朋友关系", "亲密的血缘亲属", "同一个灵魂的延伸"] },
+        { q: "你脑海中有多少关于“未来成就”的具体画面？", options: ["零，我从不看远方", "只有几个关键词", "一些模糊的景象", "有几个清晰的目标图景", "高清且充满细节的愿景板"] },
+        { q: "面对诱惑，你使用“跳出视角（上帝视角）”的能力如何？", options: ["完全没有这种意识", "很难跳出来", "有时候可以做到", "能较好地观察现在的冲动", "能瞬间切换到未来视角决策"] },
+        { q: "你认为“今天的懒惰”对“五年后的健康”影响多大？", options: ["没啥影响", "可能有一点", "中等程度", "影响显著", "毁灭性的累积影响"] },
+        { q: "当你获得一笔意外之财，你更倾向于：", options: ["立刻全部花掉庆祝", "留下一小半，花掉大部分", "五五分成", "存下大部分，奖励一小部分", "全部存入长期账户"] },
+        { q: "你觉得自己是一个“时间旅行者”吗（常在当下思考过去与未来）？", options: ["不，我只活在这一秒", "偶尔会回忆过去", "正常思考跨度", "经常预赛未来场景", "时刻在多重维度思考自我"] }
+    ];
+
+    let currentQuestion = 0;
+    let scores = [];
+
+    function startQuiz() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = questions[currentQuestion];
+        document.getElementById('question-text').innerHTML = `
+            <span class="text-blue-500 mr-2 text-xl font-mono align-top opacity-70">Q${currentQuestion + 1}.</span>
+            <span>${q.q}</span>
+        `;
+        document.getElementById('current-step').innerText = currentQuestion + 1;
+        const progress = ((currentQuestion + 1) / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+        document.getElementById('progress-percent').innerText = `已完成 ${progress.toFixed(1)}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn w-full text-left p-5 rounded-2xl text-slate-300 hover:text-white bg-slate-800/40 hover:shadow-lg flex items-center group';
+            btn.innerHTML = `
+                <span class="w-8 h-8 rounded-full bg-slate-700 group-hover:bg-blue-600 flex items-center justify-center mr-4 text-xs font-bold transition-colors">${index + 1}</span>
+                <span class="flex-1">${opt}</span>
+            `;
+            btn.onclick = () => selectOption(index + 1);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectOption(score) {
+        scores.push(score);
+        if (currentQuestion < questions.length - 1) {
+            currentQuestion++;
+            showQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        const totalScore = scores.reduce((a, b) => a + b, 0);
+        const maxScore = questions.length * 5;
+        const percentage = Math.round((totalScore / maxScore) * 100);
+
+        const circle = document.getElementById('score-circle');
+        const circumference = 628;
+        const offset = circumference - (percentage / 100) * circumference;
+        
+        setTimeout(() => {
+            circle.style.strokeDashoffset = offset;
+            let current = 0;
+            const timer = setInterval(() => {
+                if (current >= percentage) {
+                    clearInterval(timer);
+                    document.getElementById('score-value').innerText = percentage;
+                } else {
+                    current++;
+                    document.getElementById('score-value').innerText = current;
+                }
+            }, 15);
+        }, 300);
+
+        let config = {};
+        if (percentage < 45) {
+            config = {
+                badge: "低连续性",
+                title: "断裂的自我 (Disconnected)",
+                desc: "你大脑中的“现在自我”与“未来自我”像是在两个平行宇宙。这意味着你在面临抉择时，未来自我的需求几乎被完全静音了。",
+                analysis: [
+                    { h: "情感缺失", c: "你对未来的感知纯粹是理性的，缺乏情感共振。这就是为什么你即使知道后果，依然无法停止拖延。" },
+                    { h: "时间贴现极高", c: "你更倾向于把压力推给未来的“那个陌生人”。对你而言，现在的快乐是真切的，而未来的痛苦是抽象的。" }
+                ],
+                actions: [
+                    { h: "认知：跨时空对话练习", c: "每周写一封信给十年后的自己，必须使用第一人称（“我”而不是“ta”），详细描述你希望ta拥有的生活，强行建立情感纽带。" },
+                    { h: "行为：10-10-10原则", c: "做决定前问自己：这个动作在10分钟后、10个月后、10年后分别会让我感觉如何？强制引入多维度评估。" },
+                    { h: "环境：视觉锚点设计", c: "在办公桌贴一张你通过变老滤镜处理过的照片。研究证明，这种视觉冲击能即时降低30%的拖延倾向。" }
+                ],
+                tools: [
+                    { n: "StickK (社交惩罚驱动)", d: "最硬核工具。你可以设置一个目标并存入一笔押金，若未达成目标，这笔钱将自动转账给你最信任或最“毒舌”的朋友。利用“损失厌恶”和社交压力倒逼执行。" },
+                    { n: "Freedom (强制隔离)", d: "全平台内容屏蔽工具。你现在需要系统接管你的选择权，而不仅仅是依靠意志力。" }
+                ]
+            };
+        } else if (percentage < 75) {
+            config = {
+                badge: "中连续性",
+                title: "远视的盟友 (The Distant Ally)",
+                desc: "你已经意识到未来自我的存在，并在尝试照顾ta。但在高压环境下，这种联系依然会变得脆弱。",
+                analysis: [
+                    { h: "执行力波动", c: "当你状态好时能规划未来，但一旦进入“情绪低谷”，你就会瞬间倒向即时反馈。" },
+                    { h: "乐观偏见", c: "你倾向于过度神化未来的自己。总觉得明天的自己会更有自律，从而原谅今天的懒惰。" }
+                ],
+                actions: [
+                    { h: "认知：共情未来训练", c: "每天结束前，回想明早刚起床时的那个自己。问问：“我现在的行为是在帮ta省事，还是在给ta制造麻烦？”" },
+                    { h: "行为：微小承诺 (Tiny Habits)", c: "利用连续性优势，设定极其简单的“启动动作”。一旦启动，未来自我的认同感会接管后续过程。" },
+                    { h: "环境：减少摩擦力", c: "如果明天要跑步，今晚就把运动鞋摆在床头。减少未来自我的决策难度。" }
+                ],
+                tools: [
+                    { n: "Forest (视觉化专注)", d: "通过种树建立即时正向回馈，将长远努力具象化为不断生长的树木，给现在的自己一点反馈。" },
+                    { n: "Focusmate (社交承诺)", d: "与陌生人视频办公监督。利用社交压力来模拟未来自我的监督权，让ta不再孤军奋战。" }
+                ]
+            };
+        } else {
+            config = {
+                badge: "高连续性",
+                title: "合一的领航者 (Unified Navigator)",
+                desc: "恭喜！你拥有罕见的高自我连续性。你现在的每一秒都与未来紧密缝合，拥有极强的自我掌控感。",
+                analysis: [
+                    { h: "深度掌控", c: "你能感受到一种“宿命般的责任感”。现在的你就是未来你的缔造者，这种认同感是抵抗诱惑的最强盾牌。" },
+                    { h: "潜在风险：过度紧绷", c: "高连续性者有时会因为过度考虑未来而牺牲掉当下的幸福，产生压力累积。" }
+                ],
+                actions: [
+                    { h: "平衡：现在的奖励", c: "你的未来已经很有保障了，需要学习如何“不带负罪感”地享受当下，这有助于长期心理健康。" },
+                    { h: "优化：长期愿景修订", c: "定期检查长期目标是否符合你当下的价值观。别让过去的规划绑架了现在的你。" },
+                    { h: "行为：心流管理", c: "重点不再是克服拖延，而是优化深度工作的质量。尝试进入高阶的创造性心流。" }
+                ],
+                tools: [
+                    { n: "Habitica (游戏化自驱动)", d: "将你的生活变成RPG。因为你的自驱力够强，游戏化的反馈能让你的效率进一步提升。" },
+                    { n: "Notion (系统化构建)", d: "构建一套完整的目标追踪体系，享受掌控全局带来的成就感，为未来的ta描绘更清晰的蓝图。" }
+                ]
+            };
+        }
+
+        document.getElementById('result-badge').innerText = config.badge;
+        document.getElementById('result-title').innerText = config.title;
+        document.getElementById('result-desc').innerText = config.desc;
+
+        const analysisContainer = document.getElementById('deep-analysis');
+        analysisContainer.innerHTML = config.analysis.map(a => `
+            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                <h5 class="font-bold text-blue-400 mb-2">${a.h}</h5>
+                <p class="text-sm text-slate-400 leading-relaxed">${a.c}</p>
+            </div>
+        `).join('');
+
+        const actionsContainer = document.getElementById('action-plans');
+        actionsContainer.innerHTML = config.actions.map(a => `
+            <div class="advice-card p-6 rounded-2xl shadow-xl flex gap-6 items-start animate-slide-up">
+                <div class="hidden md:flex w-12 h-12 rounded-full bg-blue-500/10 items-center justify-center shrink-0">
+                    <span class="text-blue-500 font-bold">🎯</span>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold text-white mb-2">${a.h}</h5>
+                    <p class="text-slate-400 leading-relaxed">${a.c}</p>
+                </div>
+            </div>
+        `).join('');
+
+        const toolsContainer = document.getElementById('tool-recommendations');
+        toolsContainer.innerHTML = config.tools.map(t => `
+            <div class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                <h5 class="font-bold text-indigo-300 text-lg mb-2">${t.n}</h5>
+                <p class="text-sm text-slate-400 leading-relaxed">${t.d}</p>
+            </div>
+        `).join('');
+    }
+</script>
+
+</body>
+</html>
